@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\UserRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 use Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface;
@@ -38,6 +40,25 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
      * @ORM\Column(type="string")
      */
     private $password;
+
+    /**
+     * @ORM\OneToMany(targetEntity=Group::class, mappedBy="creator_id", orphanRemoval=true)
+     */
+    private $groups;
+
+    /**
+     * @ORM\ManyToMany(targetEntity=Group::class, inversedBy="users")
+     *
+     */
+    private $userGroup;
+
+
+    public function __construct()
+    {
+        $this->groups = new ArrayCollection();
+        $this->userGroups = new ArrayCollection();
+        $this->userGroup = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -131,4 +152,60 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         return in_array(self::ROLE_ADMIN, $this->getRoles());
     }
+
+    /**
+     * @return Collection|Group[]
+     */
+    public function getGroups(): Collection
+    {
+        return $this->groups;
+    }
+
+    public function addGroup(Group $group): self
+    {
+        if (!$this->groups->contains($group)) {
+            $this->groups[] = $group;
+            $group->setCreator($this);
+        }
+
+        return $this;
+    }
+
+    public function removeGroup(Group $group): self
+    {
+        if ($this->groups->removeElement($group)) {
+            // set the owning side to null (unless already changed)
+            if ($group->getCreator() === $this) {
+                $group->setCreator(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|Group[]
+     */
+    public function getUserGroup(): Collection
+    {
+        return $this->userGroup;
+    }
+
+    public function addUserGroup(Group $userGroup): self
+    {
+        if (!$this->userGroup->contains($userGroup)) {
+            $this->userGroup[] = $userGroup;
+        }
+
+        return $this;
+    }
+
+    public function removeUserGroup(Group $userGroup): self
+    {
+        $this->userGroup->removeElement($userGroup);
+
+        return $this;
+    }
+
+
 }
