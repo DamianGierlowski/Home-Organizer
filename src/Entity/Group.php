@@ -59,9 +59,15 @@ class Group
      */
     private $users;
 
+    /**
+     * @ORM\OneToMany(targetEntity=UsedProduct::class, mappedBy="owner")
+     */
+    private $used_products;
+
     public function __construct()
     {
         $this->users = new ArrayCollection();
+        $this->used_products = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -161,6 +167,36 @@ class Group
     {
         if ($this->users->removeElement($user)) {
             $user->removeUserGroup($this);
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection|UsedProduct[]
+     */
+    public function getUsedProducts(): Collection
+    {
+        return $this->used_products;
+    }
+
+    public function addUsedProduct(UsedProduct $usedProduct): self
+    {
+        if (!$this->used_products->contains($usedProduct)) {
+            $this->used_products[] = $usedProduct;
+            $usedProduct->setOwner($this);
+        }
+
+        return $this;
+    }
+
+    public function removeUsedProduct(UsedProduct $usedProduct): self
+    {
+        if ($this->used_products->removeElement($usedProduct)) {
+            // set the owning side to null (unless already changed)
+            if ($usedProduct->getOwner() === $this) {
+                $usedProduct->setOwner(null);
+            }
         }
 
         return $this;

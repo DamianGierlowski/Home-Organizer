@@ -1,0 +1,39 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}UsedProduct index{% endblock %}
+
+{% block body %}
+    <h1>UsedProduct index</h1>
+
+    <table class="table">
+        <thead>
+            <tr>
+                <th>Nazwa</th>
+                <th>Weight</th>
+                <th>Capacity</th>
+                <th>Expiration</th>
+                <th>actions</th>
+            </tr>
+        </thead>
+        <tbody>
+        {% for used_product in used_products %}
+            <tr>
+                <td>{{ used_product.product.name }}</td>
+                <td>{{ used_product.weight }}</td>
+                <td>{{ used_product.capacity }}</td>
+                <td>{{ used_product.expiration ? used_product.expiration|date('Y-m-d') : '' }}</td>
+                <td>
+{#                    <a href="{{ path('used_product_show', {'id': used_product.id}) }}">show</a>#}
+                    <a href="{{ path('used_product_edit', {'slug': group.slug,'id': used_product.id}) }}">edit</a>
+                </td>
+            </tr>
+        {% else %}
+            <tr>
+                <td colspan="5">no records found</td>
+            </tr>
+        {% endfor %}
+        </tbody>
+    </table>
+
+    <a href="{{ path('used_product_new', {'slug': group.slug})}}">Create new</a>
+{% endblock %}
